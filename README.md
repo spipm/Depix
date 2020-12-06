@@ -15,7 +15,7 @@ In [this article](https://www.linkedin.com/pulse/recovering-passwords-from-pixel
 ## Usage
 
 * Cut out the pixelated blocks from the screenshot as a single rectangle.
-* Paste a De Bruijn sequence with expected characters in an editor with the same font settings (text size, font, color, hsl).
+* Paste a [De Bruijn sequence](https://en.wikipedia.org/wiki/De_Bruijn_sequence) with expected characters in an editor with the same font settings (text size, font, color, hsl).
 * Make a screenshot of the sequence. If possible, use the same screenshot tool that was used to create the pixelized image.
 * Run `python depix.py -p [pixelated rectangle image] -s [search sequence image] -o output.png`
 
