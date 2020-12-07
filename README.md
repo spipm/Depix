@@ -35,4 +35,4 @@ Build:
 
 Run:
 
-`docker run -it --rm -v $(pwd):/data depix -p images/testimages/testimage3_pixels.png -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png`
+`docker run -it --rm -v $(pwd):/data depix -p images/testimages/testimage3_pixels.png -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png -o /data/output.png`
