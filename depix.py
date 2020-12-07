@@ -14,9 +14,9 @@ usage = '''
 '''
 
 parser = argparse.ArgumentParser(description = usage)
-parser.add_argument('-p', '--pixelimage', help = 'Path to image with pixelated rectangle')
-parser.add_argument('-s', '--searchimage', help = 'Path to image with patterns to search')
-parser.add_argument('-o', '--outputimage', help = 'Path to output image')
+parser.add_argument('-p', '--pixelimage', help = 'Path to image with pixelated rectangle', required=True)
+parser.add_argument('-s', '--searchimage', help = 'Path to image with patterns to search', required=True)
+parser.add_argument('-o', '--outputimage', help = 'Path to output image', nargs='?', default='output.png')
 args = parser.parse_args()
 
 pixelatedImagePath = args.pixelimage
