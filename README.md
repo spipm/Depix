@@ -26,3 +26,10 @@ The algorithm uses the fact that the linear box filter processes every block sep
 For most pixelized images Depix manages to find single-match results. It assumes these are correct. The matches of surrounding multi-match blocks are then compared to be geometrically at the same distance as in the pixelized image. Matches are also treated as correct. This process is repeated a couple of times.
 
 After correct blocks have no more geometrical matches, it will output all correct blocks directly. For multi-match blocks, it outputs the average of all matches.
+
+## Misc
+
+### Usage issues
+
+* **Dependency Issues** See: https://github.com/beurtschipper/Depix/issues/12
+* 
