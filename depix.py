@@ -13,10 +13,13 @@ usage = '''
 	made on a machine with the same editor and text size as the original screenshot that was pixelated. 
 '''
 
-parser = argparse.ArgumentParser(description = usage)
-parser.add_argument('-p', '--pixelimage', help = 'Path to image with pixelated rectangle', required=True)
-parser.add_argument('-s', '--searchimage', help = 'Path to image with patterns to search', required=True)
-parser.add_argument('-o', '--outputimage', help = 'Path to output image', nargs='?', default='output.png')
+parser = argparse.ArgumentParser(description=usage)
+parser.add_argument('-p', '--pixelimage',
+                    help='Path to image with pixelated rectangle', required=True)
+parser.add_argument('-s', '--searchimage',
+                    help='Path to image with patterns to search', required=True)
+parser.add_argument('-o', '--outputimage',
+                    help='Path to output image', nargs='?', default='output.png')
 args = parser.parse_args()
 
 pixelatedImagePath = args.pixelimage
@@ -33,46 +36,60 @@ searchImage = LoadedImage(searchImagePath)
 
 logging.info("Finding color rectangles from pixelated space")
 # fill coordinates here if not cut out
-pixelatedRectange = Rectangle((0, 0), (pixelatedImage.width-1, pixelatedImage.height-1))
+pixelatedRectange = Rectangle(
+    (0, 0), (pixelatedImage.width-1, pixelatedImage.height-1))
 
 
-pixelatedSubRectanges = findSameColorSubRectangles(pixelatedImage, pixelatedRectange)
+pixelatedSubRectanges = findSameColorSubRectangles(
+    pixelatedImage, pixelatedRectange)
 logging.info("Found %s same color rectangles" % len(pixelatedSubRectanges))
 
 pixelatedSubRectanges = removeMootColorRectangles(pixelatedSubRectanges)
-logging.info("%s rectangles left after moot filter" % len(pixelatedSubRectanges))
+logging.info("%s rectangles left after moot filter" %
+             len(pixelatedSubRectanges))
 
 rectangeSizeOccurences = findRectangleSizeOccurences(pixelatedSubRectanges)
-logging.info("Found %s different rectangle sizes" % len(rectangeSizeOccurences))
+logging.info("Found %s different rectangle sizes" %
+             len(rectangeSizeOccurences))
 
 logging.info("Finding matches in search image")
-rectangleMatches = findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchImage)
+rectangleMatches = findRectangleMatches(
+    rectangeSizeOccurences, pixelatedSubRectanges, searchImage)
 
 logging.info("Removing blocks with no matches")
-pixelatedSubRectanges = dropEmptyRectangleMatches(rectangleMatches, pixelatedSubRectanges)
+pixelatedSubRectanges = dropEmptyRectangleMatches(
+    rectangleMatches, pixelatedSubRectanges)
 
 
 logging.info("Splitting single matches and multiple matches")
-singleResults, pixelatedSubRectanges = splitSingleMatchAndMultipleMatches(pixelatedSubRectanges, rectangleMatches)
+singleResults, pixelatedSubRectanges = splitSingleMatchAndMultipleMatches(
+    pixelatedSubRectanges, rectangleMatches)
 
-logging.info("[%s straight matches | %s multiple matches]" % (len(singleResults), len(pixelatedSubRectanges)))
+logging.info("[%s straight matches | %s multiple matches]" %
+             (len(singleResults), len(pixelatedSubRectanges)))
 
 logging.info("Trying geometrical matches on single-match squares")
-singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges, rectangleMatches)
+singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(
+    singleResults, pixelatedSubRectanges, rectangleMatches)
 
-logging.info("[%s straight matches | %s multiple matches]" % (len(singleResults), len(pixelatedSubRectanges)))
+logging.info("[%s straight matches | %s multiple matches]" %
+             (len(singleResults), len(pixelatedSubRectanges)))
 
 logging.info("Trying another pass on geometrical matches")
-singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges, rectangleMatches)
+singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(
+    singleResults, pixelatedSubRectanges, rectangleMatches)
 
-logging.info("[%s straight matches | %s multiple matches]" % (len(singleResults), len(pixelatedSubRectanges)))
+logging.info("[%s straight matches | %s multiple matches]" %
+             (len(singleResults), len(pixelatedSubRectanges)))
 
 
 logging.info("Writing single match results to output")
-writeFirstMatchToImage(singleResults, rectangleMatches, searchImage, unpixelatedOutputImage)
+writeFirstMatchToImage(singleResults, rectangleMatches,
+                       searchImage, unpixelatedOutputImage)
 
 logging.info("Writing average results for multiple matches to output")
-writeAverageMatchToImage(pixelatedSubRectanges, rectangleMatches, searchImage, unpixelatedOutputImage)
+writeAverageMatchToImage(pixelatedSubRectanges,
+                         rectangleMatches, searchImage, unpixelatedOutputImage)
 
 # writeRandomMatchesToImage(pixelatedSubRectanges, rectangleMatches, searchImage, unpixelatedOutputImage)
 
