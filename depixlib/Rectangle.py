@@ -1,6 +1,6 @@
 
 
-class Rectangle():
+class Rectangle:
 	
 	def __init__(self, startCoordinates, endCoordinates):
 		
@@ -22,10 +22,9 @@ class ColorRectange(Rectangle):
 		self.color = color
 		
 
-class RectangleMatch():
+class RectangleMatch:
 
 	def __init__(self, x, y, data):
 		self.x = x
 		self.y = y
 		self.data = data
-		

@@ -4,8 +4,8 @@ from depixlib.functions import *
 
 import argparse
 import logging
-logging.basicConfig(level=logging.INFO)
 
+logging.basicConfig(level=logging.INFO)
 
 usage = '''
 	The pixelated rectangle must be cut out to only include the pixelated rectangles.
@@ -13,15 +13,14 @@ usage = '''
 	made on a machine with the same editor and text size as the original screenshot that was pixelated. 
 '''
 
-parser = argparse.ArgumentParser(description = usage)
-parser.add_argument('-p', '--pixelimage', help = 'Path to image with pixelated rectangle', required=True)
-parser.add_argument('-s', '--searchimage', help = 'Path to image with patterns to search', required=True)
-parser.add_argument('-o', '--outputimage', help = 'Path to output image', nargs='?', default='output.png')
+parser = argparse.ArgumentParser(description=usage)
+parser.add_argument('-p', '--pixelimage', help='Path to image with pixelated rectangle', required=True)
+parser.add_argument('-s', '--searchimage', help='Path to image with patterns to search', required=True)
+parser.add_argument('-o', '--outputimage', help='Path to output image', nargs='?', default='output.png')
 args = parser.parse_args()
 
 pixelatedImagePath = args.pixelimage
 searchImagePath = args.searchimage
-
 
 logging.info("Loading pixelated image from %s" % pixelatedImagePath)
 pixelatedImage = LoadedImage(pixelatedImagePath)
@@ -30,11 +29,9 @@ unpixelatedOutputImage = pixelatedImage.getCopyOfLoadedPILImage()
 logging.info("Loading search image from %s" % searchImagePath)
 searchImage = LoadedImage(searchImagePath)
 
-
 logging.info("Finding color rectangles from pixelated space")
 # fill coordinates here if not cut out
-pixelatedRectange = Rectangle((0, 0), (pixelatedImage.width-1, pixelatedImage.height-1))
-
+pixelatedRectange = Rectangle((0, 0), (pixelatedImage.width - 1, pixelatedImage.height - 1))
 
 pixelatedSubRectanges = findSameColorSubRectangles(pixelatedImage, pixelatedRectange)
 logging.info("Found %s same color rectangles" % len(pixelatedSubRectanges))
@@ -51,22 +48,22 @@ rectangleMatches = findRectangleMatches(rectangeSizeOccurences, pixelatedSubRect
 logging.info("Removing blocks with no matches")
 pixelatedSubRectanges = dropEmptyRectangleMatches(rectangleMatches, pixelatedSubRectanges)
 
-
 logging.info("Splitting single matches and multiple matches")
 singleResults, pixelatedSubRectanges = splitSingleMatchAndMultipleMatches(pixelatedSubRectanges, rectangleMatches)
 
 logging.info("[%s straight matches | %s multiple matches]" % (len(singleResults), len(pixelatedSubRectanges)))
 
 logging.info("Trying geometrical matches on single-match squares")
-singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges, rectangleMatches)
+singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges,
+                                                                            rectangleMatches)
 
 logging.info("[%s straight matches | %s multiple matches]" % (len(singleResults), len(pixelatedSubRectanges)))
 
 logging.info("Trying another pass on geometrical matches")
-singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges, rectangleMatches)
+singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges,
+                                                                            rectangleMatches)
 
 logging.info("[%s straight matches | %s multiple matches]" % (len(singleResults), len(pixelatedSubRectanges)))
-
 
 logging.info("Writing single match results to output")
 writeFirstMatchToImage(singleResults, rectangleMatches, searchImage, unpixelatedOutputImage)
