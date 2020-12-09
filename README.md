@@ -27,6 +27,9 @@ For most pixelized images Depix manages to find single-match results. It assumes
 
 After correct blocks have no more geometrical matches, it will output all correct blocks directly. For multi-match blocks, it outputs the average of all matches.
 
+## Reference Docs
+https://docs.contour.so/beurtschipper/Depix/getting-started
+
 ## Misc
 
 ### Usage issues
