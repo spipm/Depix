@@ -26,7 +26,7 @@ def findSameColorRectangle(pixelatedImage, startCoordinates, maxCoordinates):
 		else:
 			break
 
-	# checks if real rectange with same color. prefers horizontal rectangles
+	# checks if real rectange with same color. prefers vertical rectangles
 	for testx in range(startx, startx+width):
 		for testy in range(starty, starty+height):
 
@@ -59,7 +59,7 @@ def findSameColorSubRectangles(pixelatedImage, rectangle):
 			y += sameColorRectange.height
 
 		x += sameColorRectange.width
-	
+
 	return sameColorRectanges
 
 
@@ -71,7 +71,7 @@ def removeMootColorRectangles(colorRectanges):
 
 			if colorRectange.color in [(0,0,0),(255,255,255)]:
 				continue
-			
+
 			pixelatedSubRectanges.append(colorRectange)
 
 	return pixelatedSubRectanges
@@ -133,11 +133,11 @@ def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchIm
 
 					if (matchingRectangle.x,matchingRectangle.y) not in rectangleMatches:
 						rectangleMatches[(matchingRectangle.x,matchingRectangle.y)] = []
-					
+
 					if matchingRectangle.color == averageColor:
 						newRectangleMatch = RectangleMatch(x, y, matchData)
 						rectangleMatches[(matchingRectangle.x,matchingRectangle.y)].append(newRectangleMatch)
-	
+
 	return rectangleMatches
 
 
@@ -157,10 +157,10 @@ def splitSingleMatchAndMultipleMatches(pixelatedSubRectanges, rectangleMatches):
 	newPixelatedSubRectanges = []
 	singleResults = []
 	for colorRectange in pixelatedSubRectanges:
-		
+
 		firstMatchData = rectangleMatches[(colorRectange.x,colorRectange.y)][0].data
 		singleMatch = True
-		
+
 		for match in rectangleMatches[(colorRectange.x,colorRectange.y)]:
 
 			if firstMatchData != match.data:
@@ -201,10 +201,13 @@ def findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges, r
 					yDistanceMatches = singleResultMatch.y - compareMatch.y
 					yDistanceRectangles = singleResult.y - pixelatedSubRectange.y
 
-					if xDistanceMatches == xDistanceRectangles and yDistanceMatches == yDistanceRectangles:
-						if xDistanceMatches == singleResult.width or xDistanceMatches == pixelatedSubRectange.width:
-							if yDistanceMatches == singleResult.height or yDistanceMatches == pixelatedSubRectange.height:
-								
+					if xDistanceMatches == 0 and yDistanceMatches == 0:
+						continue
+
+					if xDistanceMatches == xDistanceRectangles:
+						if yDistanceMatches == yDistanceRectangles:
+							if xDistanceMatches in [-singleResult.width, 0, pixelatedSubRectange.width] and yDistanceMatches in [-singleResult.height, 0, pixelatedSubRectange.height]:
+
 								singleResultMatchingRectangles.append(pixelatedSubRectange)
 								dataSeen.append((compareMatch.data,singleResultMatch.data))
 
@@ -228,7 +231,7 @@ def writeFirstMatchToImage(singleMatchRectangles, rectangleMatches, searchImage,
 
 		for x in range(singleResult.width):
 			for y in range(singleResult.height):
-				
+
 				color = searchImage.imageData[singleMatch.x+x][singleMatch.y+y]
 				unpixelatedOutputImage.putpixel((singleResult.x+x,singleResult.y+y), color)
 
@@ -241,7 +244,7 @@ def writeRandomMatchesToImage(pixelatedSubRectanges, rectangleMatches, searchIma
 
 		for x in range(singleResult.width):
 			for y in range(singleResult.height):
-				
+
 				color = searchImage.imageData[singleMatch.x+x][singleMatch.y+y]
 				unpixelatedOutputImage.putpixel((singleResult.x+x,singleResult.y+y), color)
 
