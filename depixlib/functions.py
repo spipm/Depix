@@ -175,51 +175,49 @@ def splitSingleMatchAndMultipleMatches(pixelatedSubRectanges, rectangleMatches):
 	return singleResults, newPixelatedSubRectanges
 
 
+def isNeighbor(pixelA, pixelB):
+	return (pixelA.x - pixelB.x) in [pixelB.width, 0, -pixelA.width] \
+		and (pixelA.y - pixelB.y) in [pixelB.height, 0, -pixelA.height] \
+		and pixelA != pixelB
+
+
 def findGeometricMatchesForSingleResults(singleResults, pixelatedSubRectanges, rectangleMatches):
 
-	tmpSingleResults = []
 	newPixelatedSubRectanges = pixelatedSubRectanges[:]
 	newSingleResults = singleResults[:]
+	matchCount = {}
+	dataSeen = set()
 
 	for singleResult in singleResults:
+		for pixelatedSubRectange in pixelatedSubRectanges:
+			if not isNeighbor(singleResult, pixelatedSubRectange):
+				continue
+			if pixelatedSubRectange in matchCount and matchCount[pixelatedSubRectange] > 1:
+				break
 
-		totalMatches = 0
+			# use relative position to determine its neighbors
+			for singleResultMatch in rectangleMatches[(singleResult.x, singleResult.y)]:
+				for compareMatch in rectangleMatches[(pixelatedSubRectange.x, pixelatedSubRectange.y)]:
 
-		singleResultMatchingRectangles = []
-		dataSeen = []
-
-		for singleResultMatch in rectangleMatches[(singleResult.x,singleResult.y)]:
-			for pixelatedSubRectange in pixelatedSubRectanges:
-				for compareMatch in rectangleMatches[(pixelatedSubRectange.x,pixelatedSubRectange.y)]:
-
-					if (compareMatch.data,singleResultMatch.data) in dataSeen:
-						continue
-
+					xDistance = singleResult.x - pixelatedSubRectange.x
+					yDistance = singleResult.y - pixelatedSubRectange.y
 					xDistanceMatches = singleResultMatch.x - compareMatch.x
-					xDistanceRectangles = singleResult.x - pixelatedSubRectange.x
-
 					yDistanceMatches = singleResultMatch.y - compareMatch.y
-					yDistanceRectangles = singleResult.y - pixelatedSubRectange.y
 
-					if xDistanceMatches == 0 and yDistanceMatches == 0:
-						continue
+					if xDistance == xDistanceMatches and yDistance == yDistanceMatches:
+						if repr((compareMatch.data, singleResultMatch.data)) not in dataSeen:
 
-					if xDistanceMatches == xDistanceRectangles:
-						if yDistanceMatches == yDistanceRectangles:
-							if xDistanceMatches in [-singleResult.width, 0, pixelatedSubRectange.width] and yDistanceMatches in [-singleResult.height, 0, pixelatedSubRectange.height]:
+							dataSeen.add(repr((compareMatch.data, singleResultMatch.data)))
 
-								singleResultMatchingRectangles.append(pixelatedSubRectange)
-								dataSeen.append((compareMatch.data,singleResultMatch.data))
+							if pixelatedSubRectange not in matchCount:
+								matchCount[pixelatedSubRectange] = 1
+							else:
+								matchCount[pixelatedSubRectange] += 1
 
-								totalMatches += 1
-
-		if totalMatches == 1:
-			for singleResultMatchingRectangle in singleResultMatchingRectangles:
-				tmpSingleResults.append(singleResultMatchingRectangle)
-
-	for newSingleResult in tmpSingleResults:
-		newSingleResults.append(newSingleResult)
-		newPixelatedSubRectanges.remove(newSingleResult)
+	for pixelatedSubRectange in matchCount:
+		if matchCount[pixelatedSubRectange] == 1:
+			newSingleResults.append(pixelatedSubRectange)
+			newPixelatedSubRectanges.remove(pixelatedSubRectange)
 
 	return newSingleResults, newPixelatedSubRectanges
 
