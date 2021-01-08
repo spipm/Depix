@@ -44,6 +44,8 @@ logging.info("%s rectangles left after moot filter" % len(pixelatedSubRectanges)
 
 rectangeSizeOccurences = findRectangleSizeOccurences(pixelatedSubRectanges)
 logging.info("Found %s different rectangle sizes" % len(rectangeSizeOccurences))
+if len(rectangeSizeOccurences) > max(10, pixelatedRectange.width * pixelatedRectange.height * 0.01):
+	logging.warning("Too many variants on block size. Re-pixelating the image might help.")
 
 logging.info("Finding matches in search image")
 rectangleMatches = findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchImage)

@@ -1,6 +1,8 @@
 from depixlib.Rectangle import *
 from random import choice
 from PIL import Image
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 
@@ -93,6 +95,7 @@ def findRectangleSizeOccurences(colorRectanges):
 	return rectangeSizeOccurences
 
 
+# return a dictionary, with sub-rectangle coordinates as key and RectangleMatch as value
 def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchImage):
 
 	rectangleMatches = {}
@@ -103,7 +106,9 @@ def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchIm
 		rectangleWidth = rectangleSize[0]
 		rectangleHeight = rectangleSize[1]
 		pixelsInRectangle = rectangleWidth*rectangleHeight
+		# logging.info('For rectangle size {}x{}'.format(rectangleWidth, rectangleHeight))
 
+		# filter out the desired rectangle size
 		matchingRectangles = []
 		for colorRectange in pixelatedSubRectanges:
 
@@ -138,6 +143,9 @@ def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchIm
 						newRectangleMatch = RectangleMatch(x, y, matchData)
 						rectangleMatches[(matchingRectangle.x,matchingRectangle.y)].append(newRectangleMatch)
 
+			# if x % 64 == 0:
+			# 	logging.info('Scanning in searchImage: {}/{}'.format(x, searchImage.width - rectangleWidth))
+
 	return rectangleMatches
 
 
@@ -159,7 +167,7 @@ def splitSingleMatchAndMultipleMatches(pixelatedSubRectanges, rectangleMatches):
 	for colorRectange in pixelatedSubRectanges:
 
 		firstMatchData = rectangleMatches[(colorRectange.x,colorRectange.y)][0].data
-		singleMatch = True
+		singleMatch = True   # only one data matches
 
 		for match in rectangleMatches[(colorRectange.x,colorRectange.y)]:
 
