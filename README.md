@@ -29,7 +29,25 @@ After correct blocks have no more geometrical matches, it will output all correc
 
 ## Misc
 
+
+
 ### Usage issues
 
 * **Dependency Issues** See: https://github.com/beurtschipper/Depix/issues/12
-* 
+* **if you have this error message**  
+
+```
+Traceback (most recent call last):
+  File "depix.py", line 1, in <module>
+    from depixlib.LoadedImage import *
+  File "/Users/../Depix/depixlib/LoadedImage.py", line 1, in <module>
+    from PIL import Image
+ImportError: No module named PIL** 
+```
+
+Try 
+
+```
+  pip3 install -r requirements.txt
+  python3 depix.py -p images/testimages/keyword1.png -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png -o output.png
+```
