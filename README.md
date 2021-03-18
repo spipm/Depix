@@ -43,4 +43,4 @@ The algorithm uses the fact that the linear box filter processes every block sep
 ### Known limitations
 
 * The algorithm currently performs pixel averaging in the image's gamma-corrected RGB space. As a result, it cannot reconstruct images pixelated using linear RGB.
-* The algorithm matches by integer block-boundaries. As a result, it has the underlying assumption that all characters rendered (both in the de Brujin sequence and the pixelated image) that text positioning is done at pixel level. However, some modern text rasterizers position text [at sub-pixel accuracies](http://agg.sourceforge.net/antigrain.com/research/font_rasterization/).
+* The algorithm matches by integer block-boundaries. As a result, it has the underlying assumption that for all characters rendered (both in the de Brujin sequence and the pixelated image), the text positioning is done at pixel level. However, some modern text rasterizers position text [at sub-pixel accuracies](http://agg.sourceforge.net/antigrain.com/research/font_rasterization/).
