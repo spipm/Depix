@@ -44,3 +44,9 @@ The algorithm uses the fact that the linear box filter processes every block sep
 
 * The algorithm currently performs pixel averaging in the image's gamma-corrected RGB space. As a result, it cannot reconstruct images pixelated using linear RGB.
 * The algorithm matches by integer block-boundaries. As a result, it has the underlying assumption that for all characters rendered (both in the de Brujin sequence and the pixelated image), the text positioning is done at pixel level. However, some modern text rasterizers position text [at sub-pixel accuracies](http://agg.sourceforge.net/antigrain.com/research/font_rasterization/).
+
+### Future development
+
+After creating this program, someone pointed me to a research document from 2016 where a group of researchers managed to create a similar tool. Their tool has better precision and works across many different fonts. I encourage anyone passionate about this type of depixalization to implement their HMM-based version and share it:
+
+https://www.researchgate.net/publication/305423573_On_the_Ineffectiveness_of_Mosaicing_and_Blurring_as_Tools_for_Document_Redaction
