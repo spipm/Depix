@@ -30,13 +30,13 @@ python depix.py -p /path/to/your/input/image.png -s images/searchimages/debruins
 ```
 python3 depix.py -p images/testimages/testimage3_pixels.png -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png
 ```
-![image](docs/img/example_output_multiword.png)
+Result: ![image](docs/img/example_output_multiword.png)
 
 * Depixelize example image created with Sublime and pixelized with Gimp, where averaging is done in linear sRGB. The backgroundcolor option filters out the background color of the editor.
 ```
 python3 depix.py -p images/testimages/sublime_screenshot_pixels_gimp.png -s images/searchimages/debruin_sublime_Linux_small.png --backgroundcolor 40,41,35 --averagetype linear
 ```
-![image](docs/img/output_depixelizedExample_linear.png)
+Result: ![image](docs/img/output_depixelizedExample_linear.png)
 
 ## About
 ### Making a Search Image
