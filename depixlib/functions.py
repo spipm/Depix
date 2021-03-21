@@ -65,13 +65,17 @@ def findSameColorSubRectangles(pixelatedImage, rectangle):
 	return sameColorRectanges
 
 
-def removeMootColorRectangles(colorRectanges):
+def removeMootColorRectangles(colorRectanges, editorBackgroundColor):
 
 	pixelatedSubRectanges = []
 
+	mootColors = [(0,0,0), (255,255,255)]
+	if editorBackgroundColor != None:
+		mootColors.append(editorBackgroundColor)
+
 	for colorRectange in colorRectanges:
 
-			if colorRectange.color in [(0,0,0),(255,255,255)]:
+			if colorRectange.color in mootColors:
 				continue
 
 			pixelatedSubRectanges.append(colorRectange)
@@ -95,8 +99,26 @@ def findRectangleSizeOccurences(colorRectanges):
 	return rectangeSizeOccurences
 
 
+# Thanks to Artoria2e5, see
+# https://github.com/beurtschipper/Depix/pull/45
+def srgb2lin(s):
+    if s <= 0.0404482362771082:
+        lin = s / 12.92
+    else:
+        lin = ((s + 0.055) / 1.055) ** 2.4
+    return lin
+
+
+def lin2srgb(lin):
+    if lin > 0.0031308:
+        s = 1.055 * lin**(1.0 / 2.4) - 0.055
+    else:
+        s = 12.92 * lin
+    return s
+
+
 # return a dictionary, with sub-rectangle coordinates as key and RectangleMatch as value
-def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchImage):
+def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchImage, averageType = 'gammacorrected'):
 
 	rectangleMatches = {}
 
@@ -106,7 +128,6 @@ def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchIm
 		rectangleWidth = rectangleSize[0]
 		rectangleHeight = rectangleSize[1]
 		pixelsInRectangle = rectangleWidth*rectangleHeight
-		# logging.info('For rectangle size {}x{}'.format(rectangleWidth, rectangleHeight))
 
 		# filter out the desired rectangle size
 		matchingRectangles = []
@@ -114,6 +135,8 @@ def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchIm
 
 			if (colorRectange.width, colorRectange.height) == rectangleSize:
 				matchingRectangles.append(colorRectange)
+
+		logging.info('Scanning {} blocks with size {}'.format(len(matchingRectangles), rectangleSize))
 
 		for x in range(searchImage.width - rectangleWidth):
 			for y in range(searchImage.height - rectangleHeight):
@@ -124,15 +147,26 @@ def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchIm
 				for xx in range(rectangleWidth):
 
 					for yy in range(rectangleHeight):
+
 						newPixel = searchImage.imageData[x+xx][y+yy]
-						rr,gg,bb = newPixel
 						matchData.append(newPixel)
+
+						if averageType == 'gammacorrected':
+							rr,gg,bb = newPixel
+						
+						if averageType == 'linear':
+							newPixelLinear = tuple(srgb2lin(v/255) for v in newPixel)
+							rr,gg,bb = newPixelLinear
 
 						r += rr
 						g += gg
 						b += bb
 
-				averageColor = (int(r / pixelsInRectangle), int(g / pixelsInRectangle), int(b / pixelsInRectangle))
+				if averageType == 'gammacorrected':
+					averageColor = (int(r / pixelsInRectangle), int(g / pixelsInRectangle), int(b / pixelsInRectangle))
+
+				elif averageType == 'linear':
+					averageColor = tuple(int(round(lin2srgb(v / pixelsInRectangle)*255)) for v in (r,g,b))
 
 				for matchingRectangle in matchingRectangles:
 
@@ -143,8 +177,8 @@ def findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchIm
 						newRectangleMatch = RectangleMatch(x, y, matchData)
 						rectangleMatches[(matchingRectangle.x,matchingRectangle.y)].append(newRectangleMatch)
 
-			# if x % 64 == 0:
-			# 	logging.info('Scanning in searchImage: {}/{}'.format(x, searchImage.width - rectangleWidth))
+			if x % 64 == 0:
+				logging.info('Scanning in searchImage: {}/{}'.format(x, searchImage.width - rectangleWidth))
 
 	return rectangleMatches
 

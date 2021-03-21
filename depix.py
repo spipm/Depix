@@ -16,11 +16,19 @@ usage = '''
 parser = argparse.ArgumentParser(description = usage)
 parser.add_argument('-p', '--pixelimage', help = 'Path to image with pixelated rectangle', required=True)
 parser.add_argument('-s', '--searchimage', help = 'Path to image with patterns to search', required=True)
+parser.add_argument('-a', '--averagetype', help = 'Type of RGB average to use (linear or gammacorrected)',
+	default='gammacorrected', choices=['gammacorrected', 'linear'])
+parser.add_argument('-b', '--backgroundcolor', help = 'Original editor background color in format r,g,b', default=None)
 parser.add_argument('-o', '--outputimage', help = 'Path to output image', nargs='?', default='output.png')
 args = parser.parse_args()
 
 pixelatedImagePath = args.pixelimage
 searchImagePath = args.searchimage
+if args.backgroundcolor != None:
+	editorBackgroundColor = tuple([int(x) for x in args.backgroundcolor.split(",")])
+else:
+	editorBackgroundColor = args.backgroundcolor
+averageType = args.averagetype
 
 
 logging.info("Loading pixelated image from %s" % pixelatedImagePath)
@@ -39,7 +47,7 @@ pixelatedRectange = Rectangle((0, 0), (pixelatedImage.width-1, pixelatedImage.he
 pixelatedSubRectanges = findSameColorSubRectangles(pixelatedImage, pixelatedRectange)
 logging.info("Found %s same color rectangles" % len(pixelatedSubRectanges))
 
-pixelatedSubRectanges = removeMootColorRectangles(pixelatedSubRectanges)
+pixelatedSubRectanges = removeMootColorRectangles(pixelatedSubRectanges, editorBackgroundColor)
 logging.info("%s rectangles left after moot filter" % len(pixelatedSubRectanges))
 
 rectangeSizeOccurences = findRectangleSizeOccurences(pixelatedSubRectanges)
@@ -48,7 +56,7 @@ if len(rectangeSizeOccurences) > max(10, pixelatedRectange.width * pixelatedRect
 	logging.warning("Too many variants on block size. Re-pixelating the image might help.")
 
 logging.info("Finding matches in search image")
-rectangleMatches = findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchImage)
+rectangleMatches = findRectangleMatches(rectangeSizeOccurences, pixelatedSubRectanges, searchImage, averageType)
 
 logging.info("Removing blocks with no matches")
 pixelatedSubRectanges = dropEmptyRectangleMatches(rectangleMatches, pixelatedSubRectanges)
