@@ -24,6 +24,20 @@ python depix.py -p /path/to/your/input/image.png -s images/searchimages/debruins
 	* It is reccomended that you use a folder in the `images/searchimages/` directory for the `-s` flag in order to achieve best results.
 	* `-p` and `-o` (Input and output, respectively) can be either relative paths (to the repo's folder) or absolute to your drive. (`/` or `C:\`)
 
+## Example usage
+
+* Depixelize example image created with Notepad and pixelized with Greenshot. Greenshot averages by averaging the gamma-encoded 0-255 values, which is Depix's default mode.
+```
+python3 depix.py -p images/testimages/testimage3_pixels.png -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png
+```
+![image](docs/img/example_output_multiword.png)
+
+* Depixelize example image created with Sublime and pixelized with Gimp, where averaging is done in linear sRGB. The backgroundcolor option filters out the background color of the editor.
+```
+python3 depix.py -p images/testimages/sublime_screenshot_pixels_gimp.png -s images/searchimages/debruin_sublime_Linux_small.png --backgroundcolor 40,41,35 --averagetype linear
+```
+![image](docs/img/output_depixelizedExample_linear.png)
+
 ## About
 ### Making a Search Image
 * Cut out the pixelated blocks from the screenshot as a single rectangle.
@@ -42,10 +56,16 @@ The algorithm uses the fact that the linear box filter processes every block sep
 
 ### Known limitations
 
-* The algorithm currently performs pixel averaging in the image's gamma-corrected RGB space. As a result, it cannot reconstruct images pixelated using linear RGB.
 * The algorithm matches by integer block-boundaries. As a result, it has the underlying assumption that for all characters rendered (both in the de Brujin sequence and the pixelated image), the text positioning is done at pixel level. However, some modern text rasterizers position text [at sub-pixel accuracies](http://agg.sourceforge.net/antigrain.com/research/font_rasterization/).
+* ~~The algorithm currently performs pixel averaging in the image's gamma-corrected RGB space. As a result, it cannot reconstruct images pixelated using linear RGB.~~
 
 ### Future development
+
+* Implement more filter functions
+
+Create more averaging filters that work like some popular editors do.
+
+* Create a new tool that utilizes HMMs
 
 After creating this program, someone pointed me to a research document from 2016 where a group of researchers managed to create a similar tool. Their tool has better precision and works across many different fonts. I encourage anyone passionate about this type of depixalization to implement their HMM-based version and share it:
 
