@@ -67,6 +67,6 @@ Create more averaging filters that work like some popular editors do.
 
 * Create a new tool that utilizes HMMs
 
-After creating this program, someone pointed me to a research document from 2016 where a group of researchers managed to create a similar tool. Their tool has better precision and works across many different fonts. I encourage anyone passionate about this type of depixalization to implement their HMM-based version and share it:
+After creating this program, someone pointed me to a research document from 2016 where a group of researchers managed to create a similar tool. Their tool has better precision and works across many different fonts. However, their code is not public. I encourage anyone passionate about this type of depixalization to implement their HMM-based version and share it:
 
 https://www.researchgate.net/publication/305423573_On_the_Ineffectiveness_of_Mosaicing_and_Blurring_as_Tools_for_Document_Redaction
