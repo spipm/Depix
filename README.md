@@ -21,8 +21,6 @@ python -m pip install -r requirements.txt
 ```sh
 python depix.py -p /path/to/your/input/image.png -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png -o /path/to/your/output.png
 ```
-* It is recommended that you use a folder in the `images/searchimages/` directory for the `-s` flag in order to achieve best results.
-* `-p` and `-o` (Input and output, respectively) can be either relative paths (to the repo's folder) or absolute to your drive. (`/` or `C:\`)
 
 ## Example usage
 
