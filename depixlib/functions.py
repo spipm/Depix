@@ -28,7 +28,7 @@ def findSameColorRectangle(pixelatedImage, startCoordinates, maxCoordinates):
 		else:
 			break
 
-	# checks if real rectange with same color. prefers vertical rectangles
+	# checks if real rectangle with same color. prefers vertical rectangles
 	for testx in range(startx, startx+width):
 		for testy in range(starty, starty+height):
 
