@@ -1,6 +1,10 @@
-class Rectangle:
-    def __init__(self, startCoordinates, endCoordinates):
+from __future__ import annotations
 
+
+class Rectangle:
+    def __init__(
+        self, startCoordinates: tuple[int, int], endCoordinates: tuple[int, int]
+    ) -> None:
         self.startCoordinates = startCoordinates
         self.endCoordinates = endCoordinates
 
@@ -12,14 +16,19 @@ class Rectangle:
 
 
 class ColorRectange(Rectangle):
-    def __init__(self, color, startCoordinates, endCoordinates):
+    def __init__(
+        self,
+        color: tuple[int, int, int],
+        startCoordinates: tuple[int, int],
+        endCoordinates: tuple[int, int],
+    ) -> None:
 
         super(ColorRectange, self).__init__(startCoordinates, endCoordinates)
         self.color = color
 
 
 class RectangleMatch:
-    def __init__(self, x, y, data):
+    def __init__(self, x: int, y: int, data: list[tuple[int, int, int]]) -> None:
         self.x = x
         self.y = y
         self.data = data

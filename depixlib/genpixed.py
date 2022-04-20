@@ -4,7 +4,7 @@ import logging
 from .LoadedImage import LoadedImage
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
@@ -21,7 +21,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     args = parse_args()
 
     imagePath = args.image

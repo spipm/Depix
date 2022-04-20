@@ -1,14 +1,24 @@
+from __future__ import annotations
+
 import logging
 from random import choice
+from typing import cast
 
 from PIL import Image
 
-from .Rectangle import ColorRectange, RectangleMatch
+from .LoadedImage import LoadedImage
+from .Rectangle import ColorRectange, Rectangle, RectangleMatch
 
 logging.basicConfig(level=logging.INFO)
 
 
-def findSameColorRectangle(pixelatedImage, startCoordinates, maxCoordinates):
+def findSameColorRectangle(
+    pixelatedImage: LoadedImage,
+    startCoordinates: tuple[int, int],
+    maxCoordinates: tuple[int, int],
+) -> ColorRectange:
+    if pixelatedImage.imageData is None:
+        raise ValueError("imageData of pixelatedImage is not set.")
     startx, starty = startCoordinates
     color = pixelatedImage.imageData[startx][starty]
 
@@ -40,7 +50,9 @@ def findSameColorRectangle(pixelatedImage, startCoordinates, maxCoordinates):
     return ColorRectange(color, (startx, starty), (startx + width, starty + height))
 
 
-def findSameColorSubRectangles(pixelatedImage, rectangle):
+def findSameColorSubRectangles(
+    pixelatedImage: LoadedImage, rectangle: Rectangle
+) -> list[ColorRectange]:
     sameColorRectanges = []
 
     x = rectangle.x
@@ -55,9 +67,18 @@ def findSameColorSubRectangles(pixelatedImage, rectangle):
             sameColorRectange = findSameColorRectangle(
                 pixelatedImage, (x, y), (maxx, maxy)
             )
-            if sameColorRectange == False:
+            if not sameColorRectange:
                 continue
-            # logging.info("Found rectangle at (%s, %s) with size (%s,%s) and color %s" % (x, y, sameColorRectange.width,sameColorRectange.height,sameColorRectange.color))
+            # logging.info(
+            #     "Found rectangle at (%s, %s) with size (%s,%s) and color %s"
+            #     % (
+            #         x,
+            #         y,
+            #         sameColorRectange.width,
+            #         sameColorRectange.height,
+            #         sameColorRectange.color,
+            #     )
+            # )
             sameColorRectanges.append(sameColorRectange)
 
             y += sameColorRectange.height
@@ -67,30 +88,30 @@ def findSameColorSubRectangles(pixelatedImage, rectangle):
     return sameColorRectanges
 
 
-def removeMootColorRectangles(colorRectanges, editorBackgroundColor):
+def removeMootColorRectangles(
+    colorRectanges: list[ColorRectange],
+    editorBackgroundColor: tuple[int, int, int] | None,
+) -> list[ColorRectange]:
     pixelatedSubRectanges = []
 
     mootColors = [(0, 0, 0), (255, 255, 255)]
-    if editorBackgroundColor != None:
+    if editorBackgroundColor is not None:
         mootColors.append(editorBackgroundColor)
 
     for colorRectange in colorRectanges:
-
-        if colorRectange.color in mootColors:
-            continue
-
-        pixelatedSubRectanges.append(colorRectange)
+        if colorRectange.color not in mootColors:
+            pixelatedSubRectanges.append(colorRectange)
 
     return pixelatedSubRectanges
 
 
-def findRectangleSizeOccurences(colorRectanges):
-    rectangeSizeOccurences = {}
+def findRectangleSizeOccurences(
+    colorRectanges: list[ColorRectange],
+) -> dict[tuple[int, int], int]:
+    rectangeSizeOccurences: dict[tuple[int, int], int] = {}
 
     for colorRectange in colorRectanges:
-
         size = (colorRectange.width, colorRectange.height)
-
         if size in rectangeSizeOccurences:
             rectangeSizeOccurences[size] += 1
         else:
@@ -101,7 +122,7 @@ def findRectangleSizeOccurences(colorRectanges):
 
 # Thanks to Artoria2e5, see
 # https://github.com/beurtschipper/Depix/pull/45
-def srgb2lin(s):
+def srgb2lin(s: float) -> float:
     if s <= 0.0404482362771082:
         lin = s / 12.92
     else:
@@ -109,23 +130,28 @@ def srgb2lin(s):
     return lin
 
 
-def lin2srgb(lin):
+def lin2srgb(lin: float) -> float:
     if lin > 0.0031308:
         s = 1.055 * lin ** (1.0 / 2.4) - 0.055
     else:
         s = 12.92 * lin
-    return s
+    return float(s)
 
 
 # return a dictionary, with sub-rectangle coordinates as key and RectangleMatch as value
 def findRectangleMatches(
-    rectangeSizeOccurences,
-    pixelatedSubRectanges,
-    searchImage,
-    averageType="gammacorrected",
-):
-
-    rectangleMatches = {}
+    rectangeSizeOccurences: dict[tuple[int, int], int],
+    pixelatedSubRectanges: list[ColorRectange],
+    searchImage: LoadedImage,
+    averageType: str = "gammacorrected",
+) -> dict[tuple[int, int], list[RectangleMatch]]:
+    r: int | float
+    rr: int | float
+    g: int | float
+    gg: int | float
+    b: int | float
+    bb: int | float
+    rectangleMatches: dict[tuple[int, int], list[RectangleMatch]] = {}
 
     for rectangeSizeOccurence in rectangeSizeOccurences:
 
@@ -146,11 +172,10 @@ def findRectangleMatches(
                 len(matchingRectangles), rectangleSize
             )
         )
-
         for x in range(searchImage.width - rectangleWidth):
             for y in range(searchImage.height - rectangleHeight):
 
-                r = g = b = 0
+                r = g = b = 0.0
                 matchData = []
 
                 for xx in range(rectangleWidth):
@@ -161,10 +186,12 @@ def findRectangleMatches(
                         matchData.append(newPixel)
 
                         if averageType == "gammacorrected":
-                            rr, gg, bb = newPixel
+                            rr, gg, rr = newPixel
 
                         if averageType == "linear":
-                            newPixelLinear = tuple(srgb2lin(v / 255) for v in newPixel)
+                            newPixelLinear = tuple(
+                                srgb2lin(float(v / 255)) for v in newPixel
+                            )
                             rr, gg, bb = newPixelLinear
 
                         r += rr
@@ -179,9 +206,12 @@ def findRectangleMatches(
                     )
 
                 elif averageType == "linear":
-                    averageColor = tuple(
-                        int(round(lin2srgb(v / pixelsInRectangle) * 255))
-                        for v in (r, g, b)
+                    averageColor = cast(
+                        tuple[int, int, int],
+                        tuple(
+                            int(round(lin2srgb(v / pixelsInRectangle) * 255))
+                            for v in (r, g, b)
+                        ),
                     )
 
                 for matchingRectangle in matchingRectangles:
@@ -210,19 +240,22 @@ def findRectangleMatches(
     return rectangleMatches
 
 
-def dropEmptyRectangleMatches(rectangleMatches, pixelatedSubRectanges):
-
+def dropEmptyRectangleMatches(
+    rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
+    pixelatedSubRectanges: list[ColorRectange],
+) -> list[ColorRectange]:
     newPixelatedSubRectanges = []
     for pixelatedSubRectange in pixelatedSubRectanges:
-
         if len(rectangleMatches[(pixelatedSubRectange.x, pixelatedSubRectange.y)]) > 0:
             newPixelatedSubRectanges.append(pixelatedSubRectange)
 
     return newPixelatedSubRectanges
 
 
-def splitSingleMatchAndMultipleMatches(pixelatedSubRectanges, rectangleMatches):
-
+def splitSingleMatchAndMultipleMatches(
+    pixelatedSubRectanges: list[ColorRectange],
+    rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
+) -> tuple[list[ColorRectange], list[ColorRectange]]:
     newPixelatedSubRectanges = []
     singleResults = []
     for colorRectange in pixelatedSubRectanges:
@@ -244,7 +277,7 @@ def splitSingleMatchAndMultipleMatches(pixelatedSubRectanges, rectangleMatches):
     return singleResults, newPixelatedSubRectanges
 
 
-def isNeighbor(pixelA, pixelB):
+def isNeighbor(pixelA: ColorRectange, pixelB: ColorRectange) -> bool:
     return (
         (pixelA.x - pixelB.x) in [pixelB.width, 0, -pixelA.width]
         and (pixelA.y - pixelB.y) in [pixelB.height, 0, -pixelA.height]
@@ -253,12 +286,14 @@ def isNeighbor(pixelA, pixelB):
 
 
 def findGeometricMatchesForSingleResults(
-    singleResults, pixelatedSubRectanges, rectangleMatches
-):
+    singleResults: list[ColorRectange],
+    pixelatedSubRectanges: list[ColorRectange],
+    rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
+) -> tuple[list[ColorRectange], list[ColorRectange]]:
 
     newPixelatedSubRectanges = pixelatedSubRectanges[:]
     newSingleResults = singleResults[:]
-    matchCount = {}
+    matchCount: dict[ColorRectange, int] = {}
     dataSeen = set()
 
     for singleResult in singleResults:
@@ -306,8 +341,11 @@ def findGeometricMatchesForSingleResults(
 
 
 def writeFirstMatchToImage(
-    singleMatchRectangles, rectangleMatches, searchImage, unpixelatedOutputImage
-):
+    singleMatchRectangles: list[ColorRectange],
+    rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
+    searchImage: LoadedImage,
+    unpixelatedOutputImage: Image.Image,
+) -> None:
     for singleResult in singleMatchRectangles:
         singleMatch = rectangleMatches[(singleResult.x, singleResult.y)][0]
 
@@ -321,8 +359,11 @@ def writeFirstMatchToImage(
 
 
 def writeRandomMatchesToImage(
-    pixelatedSubRectanges, rectangleMatches, searchImage, unpixelatedOutputImage
-):
+    pixelatedSubRectanges: list[ColorRectange],
+    rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
+    searchImage: LoadedImage,
+    unpixelatedOutputImage: Image.Image,
+) -> None:
     for singleResult in pixelatedSubRectanges:
 
         singleMatch = choice(rectangleMatches[(singleResult.x, singleResult.y)])
@@ -337,8 +378,11 @@ def writeRandomMatchesToImage(
 
 
 def writeAverageMatchToImage(
-    pixelatedSubRectanges, rectangleMatches, searchImage, unpixelatedOutputImage
-):
+    pixelatedSubRectanges: list[ColorRectange],
+    rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
+    searchImage: LoadedImage,
+    unpixelatedOutputImage: Image.Image,
+) -> None:
     for pixelatedSubRectange in pixelatedSubRectanges:
 
         coordinate = (pixelatedSubRectange.x, pixelatedSubRectange.y)

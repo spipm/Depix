@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import argparse
 import logging
+from typing import cast
 
 from .functions import (
     dropEmptyRectangleMatches,
@@ -16,7 +19,20 @@ from .LoadedImage import LoadedImage
 from .Rectangle import Rectangle
 
 
-def parse_args():
+def check_color(s: str | None) -> tuple[int, int, int] | None:
+    if s is None:
+        return None
+    ss = s.split(",")
+    if len(ss) != 3:
+        raise argparse.ArgumentTypeError("Given colors must be formatted as r,g,b")
+    else:
+        try:
+            return cast(tuple[int, int, int], tuple([int(i) for i in ss]))
+        except ValueError:
+            raise argparse.ArgumentTypeError("Maybe %s is not int,int,int." % repr(s))
+
+
+def parse_args() -> argparse.Namespace:
     logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
     usage = """
@@ -50,6 +66,7 @@ def parse_args():
         "--backgroundcolor",
         help="Original editor background color in format r,g,b",
         default=None,
+        type=check_color,
     )
     parser.add_argument(
         "-o",
@@ -61,15 +78,12 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     args = parse_args()
 
     pixelatedImagePath = args.pixelimage
     searchImagePath = args.searchimage
-    if args.backgroundcolor != None:
-        editorBackgroundColor = tuple([int(x) for x in args.backgroundcolor.split(",")])
-    else:
-        editorBackgroundColor = args.backgroundcolor
+    editorBackgroundColor: tuple[int, int, int] | None = args.backgroundcolor
     averageType = args.averagetype
 
     logging.info("Loading pixelated image from %s" % pixelatedImagePath)
