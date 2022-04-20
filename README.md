@@ -33,7 +33,9 @@ depix \
 * Depixelize example image created with Notepad and pixelized with Greenshot. Greenshot averages by averaging the gamma-encoded 0-255 values, which is Depix's default mode.
 
 ```sh
-python3 depix.py -p images/testimages/testimage3_pixels.png -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png
+depix \
+    -p images/testimages/testimage3_pixels.png \
+    -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png
 ```
 
 Result: ![image](docs/img/example_output_multiword.png)
