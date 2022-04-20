@@ -30,6 +30,8 @@ depix \
 
 ## Example usage
 
+* (Optional) You can create pixelized image by using `genpixed`.
+
 * Depixelize example image created with Notepad and pixelized with Greenshot. Greenshot averages by averaging the gamma-encoded 0-255 values, which is Depix's default mode.
 
 ```sh

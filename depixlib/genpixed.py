@@ -1,7 +1,15 @@
 import argparse
 import logging
+import os
 
 from .LoadedImage import LoadedImage
+
+
+def check_file(s: str) -> str:
+    if os.path.isfile(s):
+        return s
+    else:
+        raise argparse.ArgumentTypeError("%s is not a file." % repr(s))
 
 
 def parse_args() -> argparse.Namespace:
@@ -9,7 +17,11 @@ def parse_args() -> argparse.Namespace:
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i", "--image", help="Path to image to pixelize", required=True
+        "-i",
+        "--image",
+        help="Path to image to pixelize",
+        required=True,
+        type=check_file,
     )
     parser.add_argument(
         "-o",
