@@ -3,8 +3,11 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import shutil
+import textwrap
 from typing import cast
 
+from . import __version__
 from .functions import (
     dropEmptyRectangleMatches,
     findGeometricMatchesForSingleResults,
@@ -18,6 +21,12 @@ from .functions import (
 )
 from .LoadedImage import LoadedImage
 from .Rectangle import Rectangle
+
+
+class DepixHelpFormatter(
+    argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter
+):
+    pass
 
 
 def check_file(s: str) -> str:
@@ -45,47 +54,69 @@ def check_color(s: str | None) -> tuple[int, int, int] | None:
 def parse_args() -> argparse.Namespace:
     logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
-    usage = """
+    usage = textwrap.dedent("""
+    note:
         The pixelated rectangle must be cut out to only include the pixelated rectangles.
         The pattern search image is generally a screenshot of a De Bruijn sequence of expected characters,
         made on a machine with the same editor and text size as the original screenshot that was pixelated.
-    """
+    """)
 
-    parser = argparse.ArgumentParser(description=usage)
+    parser = argparse.ArgumentParser(
+        description="This command recovers passwords from pixelized screenshots.",
+        formatter_class=(
+            lambda prog: DepixHelpFormatter(
+                prog,
+                **{
+                    "width": shutil.get_terminal_size(fallback=(120, 50)).columns,
+                    "max_help_position": 40,
+                },
+            )
+        ),
+        epilog=usage
+    )
     parser.add_argument(
         "-p",
         "--pixelimage",
-        help="Path to image with pixelated rectangle",
+        help="path to image with pixelated rectangle",
         required=True,
+        default=argparse.SUPPRESS,
         type=check_file,
+        metavar="PATH"
     )
     parser.add_argument(
         "-s",
         "--searchimage",
-        help="Path to image with patterns to search",
+        help="path to image with patterns to search",
         required=True,
+        default=argparse.SUPPRESS,
         type=check_file,
+        metavar="PATH",
     )
     parser.add_argument(
         "-a",
         "--averagetype",
-        help="Type of RGB average to use (linear or gammacorrected)",
+        help="type of RGB average to use",
         default="gammacorrected",
         choices=["gammacorrected", "linear"],
+        metavar="TYPE",
     )
     parser.add_argument(
         "-b",
         "--backgroundcolor",
-        help="Original editor background color in format r,g,b",
+        help="original editor background color in format r,g,b",
         default=None,
         type=check_color,
+        metavar="RGB"
     )
     parser.add_argument(
         "-o",
         "--outputimage",
-        help="Path to output image",
-        nargs="?",
+        help="path to output image",
         default="output.png",
+        metavar="PATH",
+    )
+    parser.add_argument(
+        "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
     return parser.parse_args()
 
