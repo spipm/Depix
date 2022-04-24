@@ -186,7 +186,7 @@ def findRectangleMatches(
                         matchData.append(newPixel)
 
                         if averageType == "gammacorrected":
-                            rr, gg, rr = newPixel
+                            rr, gg, bb = newPixel
 
                         if averageType == "linear":
                             newPixelLinear = tuple(
