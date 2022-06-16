@@ -14,8 +14,6 @@ In [this article](https://www.linkedin.com/pulse/recovering-passwords-from-pixel
 * Install the dependencies:
 
 ```sh
-pip install depix
-# or:
 pip install git+https://github.com/beurtschipper/Depix
 ```
 
