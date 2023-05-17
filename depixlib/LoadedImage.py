@@ -29,4 +29,4 @@ class LoadedImage:
 
                 _imageData[x][y] = rawData[rawDataCount][0:3]
                 rawDataCount += 1
-        return cast(list[list[tuple[int, int, int]]], _imageData)
+        return cast(list(list(tuple((int, int, int)))), _imageData)
