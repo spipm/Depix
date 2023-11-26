@@ -6,10 +6,8 @@ from typing import cast
 
 from PIL import Image
 
-from .LoadedImage import LoadedImage
-from .Rectangle import ColorRectange, Rectangle, RectangleMatch
-
-logging.basicConfig(level=logging.INFO)
+from depixlib.LoadedImage import LoadedImage
+from depixlib.Rectangle import ColorRectange, Rectangle, RectangleMatch
 
 
 def findSameColorRectangle(
@@ -17,8 +15,10 @@ def findSameColorRectangle(
     startCoordinates: tuple[int, int],
     maxCoordinates: tuple[int, int],
 ) -> ColorRectange:
+
     if pixelatedImage.imageData is None:
         raise ValueError("imageData of pixelatedImage is not set.")
+
     startx, starty = startCoordinates
     color = pixelatedImage.imageData[startx][starty]
 
@@ -53,6 +53,7 @@ def findSameColorRectangle(
 def findSameColorSubRectangles(
     pixelatedImage: LoadedImage, rectangle: Rectangle
 ) -> list[ColorRectange]:
+
     sameColorRectanges = []
 
     x = rectangle.x
@@ -92,6 +93,7 @@ def removeMootColorRectangles(
     colorRectanges: list[ColorRectange],
     editorBackgroundColor: tuple[int, int, int] | None,
 ) -> list[ColorRectange]:
+
     pixelatedSubRectanges = []
 
     mootColors = [(0, 0, 0), (255, 255, 255)]
@@ -108,6 +110,7 @@ def removeMootColorRectangles(
 def findRectangleSizeOccurences(
     colorRectanges: list[ColorRectange],
 ) -> dict[tuple[int, int], int]:
+
     rectangeSizeOccurences: dict[tuple[int, int], int] = {}
 
     for colorRectange in colorRectanges:
@@ -123,18 +126,24 @@ def findRectangleSizeOccurences(
 # Thanks to Artoria2e5, see
 # https://github.com/beurtschipper/Depix/pull/45
 def srgb2lin(s: float) -> float:
+    
     if s <= 0.0404482362771082:
         lin = s / 12.92
+    
     else:
         lin = ((s + 0.055) / 1.055) ** 2.4
+    
     return lin
 
 
 def lin2srgb(lin: float) -> float:
+
     if lin > 0.0031308:
         s = 1.055 * lin ** (1.0 / 2.4) - 0.055
+    
     else:
         s = 12.92 * lin
+    
     return float(s)
 
 
@@ -230,7 +239,7 @@ def findRectangleMatches(
                             (matchingRectangle.x, matchingRectangle.y)
                         ].append(newRectangleMatch)
 
-            if x % 64 == 0:
+            if x % ((searchImage.width - rectangleWidth)/10) == 0:
                 logging.info(
                     "Scanning in searchImage: {}/{}".format(
                         x, searchImage.width - rectangleWidth
@@ -244,6 +253,7 @@ def dropEmptyRectangleMatches(
     rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
     pixelatedSubRectanges: list[ColorRectange],
 ) -> list[ColorRectange]:
+
     newPixelatedSubRectanges = []
     for pixelatedSubRectange in pixelatedSubRectanges:
         if len(rectangleMatches[(pixelatedSubRectange.x, pixelatedSubRectange.y)]) > 0:
@@ -256,6 +266,7 @@ def splitSingleMatchAndMultipleMatches(
     pixelatedSubRectanges: list[ColorRectange],
     rectangleMatches: dict[tuple[int, int], list[RectangleMatch]],
 ) -> tuple[list[ColorRectange], list[ColorRectange]]:
+
     newPixelatedSubRectanges = []
     singleResults = []
     for colorRectange in pixelatedSubRectanges:
@@ -346,6 +357,7 @@ def writeFirstMatchToImage(
     searchImage: LoadedImage,
     unpixelatedOutputImage: Image.Image,
 ) -> None:
+
     for singleResult in singleMatchRectangles:
         singleMatch = rectangleMatches[(singleResult.x, singleResult.y)][0]
 
@@ -364,6 +376,7 @@ def writeRandomMatchesToImage(
     searchImage: LoadedImage,
     unpixelatedOutputImage: Image.Image,
 ) -> None:
+
     for singleResult in pixelatedSubRectanges:
 
         singleMatch = choice(rectangleMatches[(singleResult.x, singleResult.y)])
@@ -383,6 +396,7 @@ def writeAverageMatchToImage(
     searchImage: LoadedImage,
     unpixelatedOutputImage: Image.Image,
 ) -> None:
+
     for pixelatedSubRectange in pixelatedSubRectanges:
 
         coordinate = (pixelatedSubRectange.x, pixelatedSubRectange.y)

@@ -3,9 +3,8 @@ import logging
 import os
 import shutil
 
-from . import __version__
-from .depix import DepixHelpFormatter
-from .LoadedImage import LoadedImage
+from depix import DepixHelpFormatter
+from LoadedImage import LoadedImage
 
 
 def check_file(s: str) -> str:
@@ -44,9 +43,6 @@ def parse_args() -> argparse.Namespace:
         help="path to output image",
         default="output.png",
         metavar="PATH",
-    )
-    parser.add_argument(
-        "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
     return parser.parse_args()
 

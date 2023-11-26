@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
-import shutil
-import textwrap
-from typing import cast
+logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
-from . import __version__
-from .functions import (
+from PIL import Image, ImageDraw
+
+from depixlib.helpers import (
+    check_file,
+    check_color
+)
+from depixlib.functions import (
     dropEmptyRectangleMatches,
     findGeometricMatchesForSingleResults,
     findRectangleMatches,
@@ -17,61 +19,23 @@ from .functions import (
     removeMootColorRectangles,
     splitSingleMatchAndMultipleMatches,
     writeAverageMatchToImage,
-    writeFirstMatchToImage,
+    writeFirstMatchToImage
 )
-from .LoadedImage import LoadedImage
-from .Rectangle import Rectangle
-
-
-class DepixHelpFormatter(
-    argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter
-):
-    pass
-
-
-def check_file(s: str) -> str:
-    if os.path.isfile(s):
-        return s
-    else:
-        raise argparse.ArgumentTypeError("%s is not a file." % repr(s))
-
-
-def check_color(s: str | None) -> tuple[int, int, int] | None:
-    if s is None:
-        return None
-    ss = s.split(",")
-    if len(ss) != 3:
-        raise argparse.ArgumentTypeError("Given colors must be formatted as 'r,g,b'.")
-    else:
-        try:
-            return cast(tuple[int, int, int], tuple([int(i) for i in ss]))
-        except ValueError:
-            raise argparse.ArgumentTypeError(
-                "Maybe %s is not '<int>,<int>,<int>'." % repr(s)
-            )
+from depixlib.LoadedImage import LoadedImage
+from depixlib.Rectangle import Rectangle
 
 
 def parse_args() -> argparse.Namespace:
-    logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
-
-    usage = textwrap.dedent("""
+    
+    usage = """
     note:
         The pixelated rectangle must be cut out to only include the pixelated rectangles.
         The pattern search image is generally a screenshot of a De Bruijn sequence of expected characters,
         made on a machine with the same editor and text size as the original screenshot that was pixelated.
-    """)
+    """
 
     parser = argparse.ArgumentParser(
         description="This command recovers passwords from pixelized screenshots.",
-        formatter_class=(
-            lambda prog: DepixHelpFormatter(
-                prog,
-                **{
-                    "width": shutil.get_terminal_size(fallback=(120, 50)).columns,
-                    "max_help_position": 40,
-                },
-            )
-        ),
         epilog=usage
     )
     parser.add_argument(
@@ -103,7 +67,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-b",
         "--backgroundcolor",
-        help="original editor background color in format r,g,b",
+        help="original editor background color in format r,g,b (color to ignore)",
         default=None,
         type=check_color,
         metavar="RGB"
@@ -114,9 +78,6 @@ def parse_args() -> argparse.Namespace:
         help="path to output image",
         default="output.png",
         metavar="PATH",
-    )
-    parser.add_argument(
-        "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
     return parser.parse_args()
 
@@ -158,7 +119,7 @@ def main() -> None:
         10, pixelatedRectange.width * pixelatedRectange.height * 0.01
     ):
         logging.warning(
-            "Too many variants on block size. Re-pixelating the image might help."
+            "Too many variants on block size. Re-cropping the image might help."
         )
 
     logging.info("Finding matches in search image")
@@ -171,50 +132,24 @@ def main() -> None:
         rectangleMatches, pixelatedSubRectanges
     )
 
-    logging.info("Splitting single matches and multiple matches")
-    singleResults, pixelatedSubRectanges = splitSingleMatchAndMultipleMatches(
-        pixelatedSubRectanges, rectangleMatches
-    )
+    # Enhance like in the movies
+    enhance = 3
+    
+    image = Image.open(pixelatedImagePath)
+    enhancedImage = image.resize((image.width*enhance, image.height*enhance))
+    draw = ImageDraw.Draw(enhancedImage)
 
-    logging.info(
-        "[%s straight matches | %s multiple matches]"
-        % (len(singleResults), len(pixelatedSubRectanges))
-    )
+    for box in pixelatedSubRectanges:
 
-    logging.info("Trying geometrical matches on single-match squares")
-    singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(
-        singleResults, pixelatedSubRectanges, rectangleMatches
-    )
+        draw.line([
+            (box.x*enhance, box.y*enhance),
+            (((box.x+box.width)*enhance)-enhance, box.y*enhance ),
+            (((box.x+box.width)*enhance)-enhance, ((box.y+box.height)*enhance)-enhance),
+            (box.x*enhance, ((box.y+box.height)*enhance) - enhance),
+            (box.x*enhance, box.y*enhance)
+            ], width=1, fill="red")
 
-    logging.info(
-        "[%s straight matches | %s multiple matches]"
-        % (len(singleResults), len(pixelatedSubRectanges))
-    )
-
-    logging.info("Trying another pass on geometrical matches")
-    singleResults, pixelatedSubRectanges = findGeometricMatchesForSingleResults(
-        singleResults, pixelatedSubRectanges, rectangleMatches
-    )
-
-    logging.info(
-        "[%s straight matches | %s multiple matches]"
-        % (len(singleResults), len(pixelatedSubRectanges))
-    )
-
-    logging.info("Writing single match results to output")
-    writeFirstMatchToImage(
-        singleResults, rectangleMatches, searchImage, unpixelatedOutputImage
-    )
-
-    logging.info("Writing average results for multiple matches to output")
-    writeAverageMatchToImage(
-        pixelatedSubRectanges, rectangleMatches, searchImage, unpixelatedOutputImage
-    )
-
-    # writeRandomMatchesToImage(pixelatedSubRectanges, rectangleMatches, searchImage, unpixelatedOutputImage)
-
-    logging.info("Saving output image to: %s" % args.outputimage)
-    unpixelatedOutputImage.save(args.outputimage)
+    enhancedImage.show()
 
 
 if __name__ == "__main__":
