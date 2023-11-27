@@ -57,13 +57,13 @@ python3 tool_show_boxes.py \
     -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png
 ```
 
-* (Optional) You can create pixelized image by using `genpixed`.
+* (Optional) You can create pixelized image by using `tool_gen_pixelated.py`.
 
 ```sh
-genpixed -i /path/to/image.png -o pixed_output.png
+python3 tool_gen_pixelated.py -i /path/to/image.png -o pixed_output.png
 ```
 
-* For a detailed explanation, please try to run `$ depix -h` and `genpixed`.
+* For a detailed explanation, please try to run `$ python3 depix.py -h` and `tool_gen_pixelated.py`.
 
 ## About
 
