@@ -9,7 +9,7 @@ In [this article](https://www.spipm.nl/2030.html) I cover background information
 
 ![image](docs/img/Recovering_prototype_latest.png)
 
-## Installation
+## Updates
 
 * 27 nov '23: Refactored and removed all this pip stuff. I like scripts I can just run. If a package can't be found, just install it. Also added `tool_show_boxes.py` to show how bad the box detector is (you have to really cut out the pixels exactly). Made a TODO to create a version that just cuts out boxes of static size.
 
