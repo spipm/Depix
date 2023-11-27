@@ -1,6 +1,8 @@
 import os
 import argparse
 
+from typing import cast
+
 def check_file(s: str) -> str:
     if os.path.isfile(s):
         return s

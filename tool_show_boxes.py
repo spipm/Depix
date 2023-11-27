@@ -139,6 +139,7 @@ def main() -> None:
     enhancedImage = image.resize((image.width*enhance, image.height*enhance))
     draw = ImageDraw.Draw(enhancedImage)
 
+    # Show crappy box detector output
     for box in pixelatedSubRectanges:
 
         draw.line([
