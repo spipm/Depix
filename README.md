@@ -35,7 +35,9 @@ python3 depix.py \
     -s images/searchimages/debruinseq_notepad_Windows10_closeAndSpaced.png
 ```
 
-Result: ![image](docs/img/example_output_multiword.png)
+Result:
+![example_output_multiword](https://github.com/iRupam/Depix/assets/27852445/27d0b374-c25c-4683-b979-b0b060945cb9)
+
 
 * Depixelize example image created with Sublime and pixelized with Gimp, where averaging is done in linear sRGB. The backgroundcolor option filters out the background color of the editor.
 
@@ -47,7 +49,9 @@ python3 depix.py \
     --averagetype linear
 ```
 
-Result: ![image](docs/img/output_depixelizedExample_linear.png)
+Result:
+![output_depixelizedExample_linear](https://github.com/iRupam/Depix/assets/27852445/bb5b8e8d-acc4-439c-a0d8-8a9938c16983)
+
 
 * (Optional) You can view if the box detector thingie finds your pixels with `tool_show_boxes.py`. Consider a smaller batch of pixels if this looks all mangled. Example of good looking boxes:
 
